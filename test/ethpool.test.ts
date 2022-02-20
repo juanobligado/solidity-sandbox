@@ -37,7 +37,21 @@ describe('ETHPool', () => {
       await expect(poolContract.distributeReward({value : amount})).to.be.revertedWith('');
     });
 
-    it('should get rewards after depositing', async () => {
+    const amount = utils.parseEther('0.5');
+    await poolContract.deposit({value : amount});
+    const reward = utils.parseEther('0.25'); 
+    await poolContract.distributeReward({value : reward});
+    poolContract.on('DistributeReward',(distReward)=>{
+      console.log('DistributeReward Event',reward)
+      expect(distReward).to.eq(reward );
+    });
+
+  
+  });
+
+  describe('withdraw', async ()=>{
+
+    it('should emit WithdrawReward Event', async () => {
       const amount = utils.parseEther('0.5');
       await poolContract.deposit({value : amount});
       const reward = utils.parseEther('0.25'); 
@@ -48,13 +62,12 @@ describe('ETHPool', () => {
         expect(reward).to.be.greaterThan(BigNumber.from(0));
         expect(deposited).to.be.greaterThan(BigNumber.from(0));
       });
-      const myDepositWithReward = await poolContract.withdraw();
-
+      const wtdrwTx = await poolContract.withdraw();
       const totalDeposits = await poolContract.totalDeposits();
       expect(totalDeposits.toNumber()).to.eq(0); 
     });
-  
-  });
+
+  })
 
 
 

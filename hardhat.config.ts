@@ -89,7 +89,7 @@ const config: HardhatUserConfig = {
       },
     ],
   },
-  defaultNetwork: 'hardhat',
+  defaultNetwork: 'rinkeby',
   networks: {
     hardhat: {
       chainId: 1337,
@@ -99,6 +99,16 @@ const config: HardhatUserConfig = {
       blockGasLimit: 12000000,
       accounts: {
         mnemonic: 'myth like bonus scare over problem client lizard pioneer submit female collect',
+      },
+    },
+    rinkeby: {
+      chainId: 4,
+      loggingEnabled: false,
+      gas: 12000000,
+      gasPrice: 'auto',
+      blockGasLimit: 12000000,
+      accounts: {
+        mnemonic: `${process.env.RINKEBY_MNEMONIC}`,
       },
     },
     ganache: {

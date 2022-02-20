@@ -20,16 +20,17 @@ contract ETHPool is  ReentrancyGuard, Ownable, AccessControl {
     using ABDKMath64x64 for int128;
 
 
+    event DistributeReward( uint256 reward);
     event WithdrawReward( address user ,uint256 deposited, uint256 rewards, uint256 totalWithdrawn);
 
 
 
     bytes32 public constant TEAM_MEMBER_ROLE = keccak256("TEAM_MEMBER_ROLE");
     uint256 public totalDeposits = 0;
-    int128 public current_reward_deposits_rate = 0;
+    int128 private  current_reward_deposits_rate = 0;
     // Note reward_deposits_rate :  S[t] = reward[t] / totalRewards [t]
-    mapping(address => int128) public initial_reward_deposits_rate;
-    mapping(address => uint256) public stake;
+    mapping(address => int128) private  initial_reward_deposits_rate;
+    mapping(address => uint256) private  stake;
 
     constructor() {
         _setupRole(TEAM_MEMBER_ROLE, msg.sender);
@@ -68,8 +69,9 @@ contract ETHPool is  ReentrancyGuard, Ownable, AccessControl {
     function distributeReward() external payable onlyRole(TEAM_MEMBER_ROLE) {
         require(msg.value > 0, "Should have reward to distribute");
         require(totalDeposits > 0,'Should have stake amount to calculate stake / reward rate');
-        current_reward_deposits_rate = current_reward_deposits_rate +   msg.value.divu(totalDeposits);
 
+        current_reward_deposits_rate = current_reward_deposits_rate +   msg.value.divu(totalDeposits);
+        emit DistributeReward(msg.value);
     }
 
 
@@ -85,8 +87,8 @@ contract ETHPool is  ReentrancyGuard, Ownable, AccessControl {
         uint256 withdrawAmount = deposited + reward; 
         stake[msg.sender] = 0;
         (bool sent, bytes memory data) = msg.sender.call{value: withdrawAmount}("");
-        emit WithdrawReward(msg.sender,deposited, reward, withdrawAmount);
         require(sent, "Failed to send Ether");
+        emit WithdrawReward(msg.sender,deposited, reward, withdrawAmount);
         return withdrawAmount;
     }
 
